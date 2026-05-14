@@ -1,0 +1,24 @@
+jobs:
+  build:
+    runs-on: windows-latest # Bắt buộc dùng môi trường Windows để build phần mềm Desktop
+    permissions:
+      contents: write # Cấp quyền cho GitHub Actions được phép tự động tạo Release
+
+    steps:
+    - name: Lấy mã nguồn
+    - name: Build phần mềm thành 1 file .exe
+      run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./output
+
+    - name: Đọc số phiên bản từ file version.txt
+      run: |
+        $ver = (Get-Content version.txt).Trim()
+        "VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Tự động đăng bài Release và đính kèm file .exe
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ env.VERSION }}
+        name: Phần mềm Tổng Hợp Thuế v${{ env.VERSION }}
+        body: 🚀 Bản cập nhật tự động được biên dịch và phát hành bởi GitHub Actions.
+        files: ./output/*.exe
+        make_latest: true
