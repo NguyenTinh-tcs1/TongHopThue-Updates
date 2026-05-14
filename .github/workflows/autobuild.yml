@@ -1,0 +1,27 @@
+name: Auto Build EXE
+
+on:
+  push:
+    branches: [ "main" ] # Tự động chạy khi bạn tải code mới lên nhánh main
+
+jobs:
+  build:
+    runs-on: windows-latest # Bắt buộc dùng môi trường Windows để build phần mềm Desktop
+
+    steps:
+    - name: Lấy mã nguồn
+      uses: actions/checkout@v4
+
+    - name: Cài đặt .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x' # Sửa lại thành 6.0.x hoặc 7.0.x tùy theo phiên bản .NET bạn đang dùng
+
+    - name: Build phần mềm thành 1 file .exe
+      run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./output
+
+    - name: Lưu trữ file .exe
+      uses: actions/upload-artifact@v4
+      with:
+        name: TongHopThue-vMoiNhat
+        path: ./output/*.exe
